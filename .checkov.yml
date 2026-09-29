@@ -1,0 +1,18 @@
+# ============================================================
+#  Configuration Checkov — scan de sécurité Terraform
+#  Fichier : .checkov.yml
+# ============================================================
+
+# Checks à ignorer (avec justification)
+skip-check:
+  - CKV_TF_1   # Module source sans hash de commit (provider local = OK)
+
+# Dossiers à scanner
+directory:
+  - "."
+
+# Format de sortie
+output: cli
+
+# Seuil d'échec
+soft-fail: false

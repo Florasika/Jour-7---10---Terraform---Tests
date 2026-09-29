@@ -1,0 +1,55 @@
+# ============================================================
+#  GitHub Actions : tests Terraform automatisés
+#  Fichier : .github/workflows/terraform-tests.yml
+# ============================================================
+
+name: Terraform Tests
+
+on:
+  push:
+    paths: ['**.tf', '**.tfvars']
+  pull_request:
+    paths: ['**.tf', '**.tfvars']
+
+jobs:
+  tests:
+    name: Tests Terraform
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./day-07-tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0"
+
+      - name: Install tflint
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+
+      - name: Install checkov
+        run: pip install checkov
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: tflint
+        run: |
+          tflint --init
+          tflint --config=.tflint.hcl .
+
+      - name: checkov
+        run: checkov -d . --config-file .checkov.yml --quiet
+
+      - name: Run test script
+        run: bash test_terraform.sh
